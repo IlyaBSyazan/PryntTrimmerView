@@ -68,6 +68,8 @@ public protocol TrimmerViewDelegate: AnyObject {
     private let rightHandleKnob = UIView()
     private let leftMaskView = UIView()
     private let rightMaskView = UIView()
+    private let leftTimeLabel = UILabel()
+    private let rightTimeLabel = UILabel()
 
     // MARK: Constraints
 
@@ -94,6 +96,7 @@ public protocol TrimmerViewDelegate: AnyObject {
         setupHandleView()
         setupMaskView()
         setupPositionBar()
+        setupTimeLabels()
         setupGestures()
         updateMainColor()
         updateHandleColor()
@@ -104,6 +107,19 @@ public protocol TrimmerViewDelegate: AnyObject {
         assetPreview.rightAnchor.constraint(equalTo: rightAnchor, constant: -handleWidth).isActive = true
         assetPreview.topAnchor.constraint(equalTo: topAnchor).isActive = true
         assetPreview.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        assetPreview.clipsToBounds = false
+    }
+    
+    private func setupTimeLabels() {
+        addSubview(leftTimeLabel)
+        leftTimeLabel.translatesAutoresizingMaskIntoConstraints = false
+        leftTimeLabel.centerXAnchor.constraint(equalTo: leftHandleView.centerXAnchor).isActive = true
+        leftTimeLabel.bottomAnchor.constraint(equalTo: leftHandleView.topAnchor, constant: -20).isActive = true
+        
+        addSubview(rightTimeLabel)
+        rightTimeLabel.translatesAutoresizingMaskIntoConstraints = false
+        rightTimeLabel.centerXAnchor.constraint(equalTo: rightHandleView.centerXAnchor).isActive = true
+        rightTimeLabel.bottomAnchor.constraint(equalTo: rightHandleView.topAnchor, constant: -20).isActive = true
     }
 
     private func setupTrimmerView() {
@@ -168,7 +184,7 @@ public protocol TrimmerViewDelegate: AnyObject {
         leftMaskView.translatesAutoresizingMaskIntoConstraints = false
         insertSubview(leftMaskView, belowSubview: leftHandleView)
 
-        leftMaskView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        leftMaskView.leftAnchor.constraint(equalTo: leftAnchor, constant: -30).isActive = true
         leftMaskView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         leftMaskView.topAnchor.constraint(equalTo: topAnchor).isActive = true
         leftMaskView.rightAnchor.constraint(equalTo: leftHandleView.centerXAnchor).isActive = true
@@ -179,7 +195,7 @@ public protocol TrimmerViewDelegate: AnyObject {
         rightMaskView.translatesAutoresizingMaskIntoConstraints = false
         insertSubview(rightMaskView, belowSubview: rightHandleView)
 
-        rightMaskView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        rightMaskView.rightAnchor.constraint(equalTo: rightAnchor, constant: 30).isActive = true
         rightMaskView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         rightMaskView.topAnchor.constraint(equalTo: topAnchor).isActive = true
         rightMaskView.leftAnchor.constraint(equalTo: rightHandleView.centerXAnchor).isActive = true
@@ -273,6 +289,9 @@ public protocol TrimmerViewDelegate: AnyObject {
     override func assetDidChange(newAsset: AVAsset?) {
         super.assetDidChange(newAsset: newAsset)
         resetHandleViewPosition()
+        
+        leftTimeLabel.text = "0 s"
+        rightTimeLabel.text = "\(Int(maxDuration)) s"
     }
 
     private func resetHandleViewPosition() {
@@ -316,6 +335,13 @@ public protocol TrimmerViewDelegate: AnyObject {
             delegate?.positionBarStoppedMoving(playerTime)
         } else {
             delegate?.didChangePositionBar(playerTime)
+        }
+        
+        if let startTime = startTime {
+            leftTimeLabel.text = "\(Int(CMTimeGetSeconds(startTime))) s"
+        }
+        if let endTime = endTime {
+            rightTimeLabel.text = "\(Int(CMTimeGetSeconds(endTime))) s"
         }
     }
 
